@@ -8,6 +8,7 @@
       requirements = ''
         -e .
         ruff
+        pytest
       '';
     };
   };
