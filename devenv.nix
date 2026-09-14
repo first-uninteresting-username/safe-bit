@@ -6,7 +6,7 @@
     venv = {
       enable = true;
       requirements = ''
-        pytest
+        -e .
         ruff
       '';
     };
