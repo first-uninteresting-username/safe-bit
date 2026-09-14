@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ ... }:
 
 {
   languages.python = {
@@ -14,4 +14,8 @@
   };
 
   git-hooks.hooks.ruff.enable = true;
+
+  scripts = {
+    "silence-ruff".exec = "ruff check --fix . && ruff format .";
+  };
 }
