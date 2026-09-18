@@ -21,3 +21,8 @@ def get_key_valid_until(dt: datetime) -> int:
 
 def get_date_from_time(t: int) -> datetime:
     return t0 + timedelta(minutes=t)
+
+def get_current_time() -> int:
+    now = datetime.now(UTC)
+    now_int = get_time(now)
+    return now_int
