@@ -1,26 +1,23 @@
 from datetime import UTC, datetime, timedelta
 from math import floor
 
-# Sep 14 2026 00:00:00 UTC
-# 1789344000
-# Configurable in the future
-t0 = datetime(2026, 9, 14, 0, 0, 0, tzinfo=UTC)
+from .constants import KEY_VALIDITY, T0
 
 
 def get_time(dt: datetime) -> int:
-    diff = dt - t0
+    diff = dt - T0
     total_minutes = floor(diff.total_seconds() / 60)
     return int(total_minutes)
 
 
 def get_key_valid_until(dt: datetime) -> int:
-    diff = dt - t0
+    diff = dt - T0
     total_minutes = floor(diff.total_seconds() / 60)
-    return int(total_minutes) + 10080  # 7 days
+    return int(total_minutes) + KEY_VALIDITY
 
 
 def get_date_from_time(t: int) -> datetime:
-    return t0 + timedelta(minutes=t)
+    return T0 + timedelta(minutes=t)
 
 def get_current_time() -> int:
     now = datetime.now(UTC)
