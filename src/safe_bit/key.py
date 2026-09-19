@@ -1,2 +1,2 @@
 class key:
-    pass
+    current: str = ""

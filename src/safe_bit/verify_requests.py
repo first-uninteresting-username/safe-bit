@@ -35,18 +35,20 @@ def verify_get_bit(request: dict[str, str], allowed_diff: int = 5) -> int:
     if "secret" not in request:
             raise NoSecretFieldError("request is missing required 'secret' field")
 
-    if "time" not in request:
+    if "timestamp" not in request:
         declared_time = time
     else:
-        declared_time = int(request["time"])
+        declared_time = int(request["timestamp"])
 
     time_diff = time - declared_time
     if time_diff > allowed_diff:
         raise DeclaredTimeInPastError(f"Declared time ({declared_time}) is {time_diff} minutes ago. Maximal allowed difference is {allowed_diff}")
     if time_diff < 0:
-        raise DeclaredTimeInFutureError(f"Declared time ({declared_time}) is in the future")
+        raise DeclaredTimeInFutureError(f"Declared time ({declared_time}) is in the future!")
 
     # NotBase64EncodedError is raised by itself
     _ = verify_valid_b64(request["secret"])
 
     return declared_time
+
+# Todo: add verification for other endpoints
