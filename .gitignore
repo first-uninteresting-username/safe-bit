@@ -229,3 +229,4 @@ devenv.local.yaml
 .pre-commit-config.yaml
 
 reference.md
+.kilo/

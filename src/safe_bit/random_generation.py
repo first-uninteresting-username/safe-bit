@@ -10,9 +10,9 @@ def hash_two_strings(s1: str, s2: str) -> str:
     digest = sha512(b).hexdigest()
     return digest
 
-def generate_random_bit_sequence(secret: str, key: key, len: int = 1) -> bytes:
+def generate_random_bit_sequence(secret: str, key: key, length: int = 1) -> bytes:
     current = key.current
     hash = hash_two_strings(secret, current)
     rng = Random(hash)
-    sequence = rng.randbytes(len)
+    sequence = rng.randbytes(length)
     return sequence

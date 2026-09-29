@@ -16,6 +16,9 @@ class NoSecretFieldError(ValueError):
 class NotBase64EncodedError(ValueError):
     pass
 
+class NotAnIntegerError(ValueError):
+    pass
+
 def verify_valid_b64(s: str) -> None:
     if s == "":
         return
@@ -29,18 +32,24 @@ def verify_valid_b64(s: str) -> None:
         raise NotBase64EncodedError(e)
     return
 
+def verify_valid_timestamp(s: str) -> int:
+    # int() would also accept "+12", " 12 ", "1_2" and non-ASCII digits
+    if not fullmatch(r"[0-9]+", s):
+        raise NotAnIntegerError(f"Timestamp {s!r} is not a non-negative decimal integer")
+    return int(s)
+
 # Todo: Switch to Pydantic model when you implement it in fastapi
 def verify_get_bit(request: dict[str, str], allowed_diff: int = 5) -> int:
-    time = get_current_time()
+    now = get_current_time()
     if "secret" not in request:
             raise NoSecretFieldError("request is missing required 'secret' field")
 
     if "timestamp" not in request:
-        declared_time = time
+        declared_time = now
     else:
-        declared_time = int(request["timestamp"])
+        declared_time = verify_valid_timestamp(request["timestamp"])
 
-    time_diff = time - declared_time
+    time_diff = now - declared_time
     if time_diff > allowed_diff:
         raise DeclaredTimeInPastError(f"Declared time ({declared_time}) is {time_diff} minutes ago. Maximal allowed difference is {allowed_diff}")
     if time_diff < 0:
