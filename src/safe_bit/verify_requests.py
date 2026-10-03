@@ -33,7 +33,6 @@ def verify_valid_b64(s: str) -> None:
     return
 
 def verify_valid_timestamp(s: str) -> int:
-    # int() would also accept "+12", " 12 ", "1_2" and non-ASCII digits
     if not fullmatch(r"[0-9]+", s):
         raise NotAnIntegerError(f"Timestamp {s!r} is not a non-negative decimal integer")
     return int(s)
