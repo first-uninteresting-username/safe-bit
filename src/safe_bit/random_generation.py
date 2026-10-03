@@ -1,18 +1,29 @@
+from collections.abc import Iterator
 from hashlib import sha512
-from random import Random
 
 from .key import key
 
 
-def hash_two_strings(s1: str, s2: str) -> str:
+class SeedTooBigError(ValueError):
+    pass
+
+def _generate_bit_sequence(seed: int, count: int) -> Iterator[int]:
+    if not 0 <= seed < 4294967296:
+        raise SeedTooBigError("Seed must be between 0 and 4294967295")
+
+    s = seed
+    for _ in range(count):
+            s = (1664525 * s + 1013904223) % 4294967296
+            yield s // 16777216
+
+def hash_two_strings(s1: str, s2: str) -> bytes:
     string = s1 + s2
     b = string.encode("utf-8")
-    digest = sha512(b).hexdigest()
+    digest = sha512(b).digest()
     return digest
 
-def generate_random_bit_sequence(secret: str, key: key, length: int = 1) -> bytes:
+def generate_random_bit_sequence_from_secret(secret: str, key: key, length: int = 1) -> bytes:
     current = key.current
     hash = hash_two_strings(secret, current)
-    rng = Random(hash)
-    sequence = rng.randbytes(length)
+    sequence = bytes(_generate_bit_sequence(int.from_bytes(hash, "big") % 4294967296, length))
     return sequence
