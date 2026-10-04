@@ -7,7 +7,8 @@ from .key import key
 class SeedTooBigError(ValueError):
     pass
 
-def _generate_bit_sequence(seed: int, count: int) -> Iterator[int]:
+# The implementation might be changed, but the algorithm must stay the same
+def _generate_byte_sequence(seed: int, count: int) -> Iterator[int]:
     if not 0 <= seed < 4294967296:
         raise SeedTooBigError("Seed must be between 0 and 4294967295")
 
@@ -25,5 +26,5 @@ def hash_two_strings(s1: str, s2: str) -> bytes:
 def generate_random_bit_sequence_from_secret(secret: str, key: key, length: int = 1) -> bytes:
     current = key.current
     hash = hash_two_strings(secret, current)
-    sequence = bytes(_generate_bit_sequence(int.from_bytes(hash, "big") % 4294967296, length))
+    sequence = bytes(_generate_byte_sequence(int.from_bytes(hash, "big") % 4294967296, length))
     return sequence
