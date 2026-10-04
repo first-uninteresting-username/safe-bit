@@ -7,6 +7,7 @@
       enable = true;
       requirements = ''
         -e .
+        cryptography
         ruff
         pytest
       '';
