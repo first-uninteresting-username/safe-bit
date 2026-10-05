@@ -14,5 +14,5 @@ class key:
 
     def encrypt_minute(self, minute: int) -> bytes:
         nonce = self.generation.to_bytes(4, "big") + minute.to_bytes(8, "big")
-        encrypted = self.cipher.encrypt(nonce, minute.to_bytes(), None)
+        encrypted = self.cipher.encrypt(nonce, minute.to_bytes(16, "big"), None)
         return encrypted
