@@ -47,3 +47,23 @@ def encode(b: bytes) -> str:
 
         position = position + 3
     return result
+
+def decode(s: str) -> bytes:
+    result = b""
+
+    for position in range(0, len(s), 4):
+        group = s[position:position + 4]
+
+        padding = group.count("=")
+        value = 0
+
+        for char in group:
+            value <<= 6
+
+            if char != "=":
+                value |= ALPHABET.index(char)
+
+        decoded = value.to_bytes(3, "big")
+        result += decoded[:3 - padding]
+
+    return result
