@@ -17,13 +17,13 @@ def _generate_byte_sequence(seed: int, count: int) -> Iterator[int]:
             s = (1664525 * s + 1013904223) % 4294967296
             yield s // 16777216
 
-def _hash_secret_minute(secret: str, minute: bytes) -> bytes:
-    s = secret.encode("utf-8")
-    b = s + minute
+def _hash_secret_minute(secret: bytes, minute: bytes) -> bytes:
+    length_prefix = len(secret).to_bytes(4, "big")
+    b = length_prefix + secret + minute
     digest = sha512(b).digest()
     return digest
 
-def generate_random_bit_sequence_from_secret(secret: str, key: key, timestamp: int, length: int = 1) -> bytes:
+def generate_random_bit_sequence_from_secret(secret: bytes, key: key, timestamp: int, length: int = 1) -> bytes:
     minute = key.encrypt_minute(timestamp)
     hash = _hash_secret_minute(secret, minute)
     sequence = bytes(_generate_byte_sequence(int.from_bytes(hash, "big") % 4294967296, length))
