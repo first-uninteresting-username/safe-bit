@@ -1,20 +1,16 @@
 from cryptography.hazmat.primitives.ciphers.aead import ChaCha20Poly1305
 
 
-class key:
+class Key:
     def __init__(self, material: bytes, generation: int, valid_from: int, valid_until: int):
         if len(material) != 32:
             raise ValueError("Key material must be 32 bytes long")
-        if generation <= 0:
-            raise ValueError("Generation must be non negative")
-        if valid_from <= 0:
-            raise ValueError("Valid from must be non negative")
-        if valid_until < 0:
-            raise ValueError("Valid until must be positive")
+        if not 0 <= generation < 2**32:
+                raise ValueError("Generation must fit an unsigned 32-bit integer")
+        if not 0 <= valid_from < valid_until:
+            raise ValueError("Validity must satisfy 0 <= valid_from < valid_until")
         if valid_from > valid_until:
             raise ValueError("Valid from must be less than valid until")
-        if generation >= 2**32:
-            raise ValueError("Generation must be less than 2^32")
 
         self.material: bytes = material
         self.generation: int = generation

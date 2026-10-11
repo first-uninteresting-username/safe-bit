@@ -1,7 +1,7 @@
 from collections.abc import Iterator
 from hashlib import sha512
 
-from .key import key
+from .key import Key
 
 
 class SeedTooBigError(ValueError):
@@ -23,7 +23,7 @@ def hash_secret_minute(secret: bytes, minute: bytes) -> bytes:
     digest = sha512(b).digest()
     return digest
 
-def generate_random_byte_sequence_from_secret(secret: bytes, key: key, timestamp: int, length: int = 1) -> bytes:
+def generate_random_byte_sequence_from_secret(secret: bytes, key: Key, timestamp: int, length: int = 1) -> bytes:
     minute = key.encrypt_minute(timestamp)
     hash = hash_secret_minute(secret, minute)
     sequence = bytes(_generate_byte_sequence(int.from_bytes(hash, "big") % 4294967296, length))
