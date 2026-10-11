@@ -229,4 +229,5 @@ devenv.local.yaml
 .pre-commit-config.yaml
 
 reference.md
+key-storage-spec.md
 .kilo/
