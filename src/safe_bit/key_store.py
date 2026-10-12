@@ -113,10 +113,12 @@ class KeyStore:
         self.insert(key)
         return key
 
-    def ensure_current_key(self) -> Key:
+    def ensure_current_key(self, time: int | None = None) -> Key:
+        if time is None:
+                time = get_current_time()
         _ = self._conn.execute("BEGIN IMMEDIATE")
         try:
-            minute = get_current_time()
+            minute = time
             try:
                 key = self.get_key_for_minute(minute)
             except NoKeyForMinuteError:
@@ -126,3 +128,6 @@ class KeyStore:
         except Exception:
             _ = self._conn.execute("ROLLBACK")
             raise
+
+    def close(self) -> None:
+        self._conn.close()
