@@ -16,7 +16,7 @@ def _compute_commitment_and_bit(
     h1 = hash_secret_minute(s, e)
     byte = generate_random_byte_sequence_from_secret(s, key, timestamp, 1)
     bit = byte[0] & 1
-    h2 = sha512(h1 + bytes(bit)).digest()
+    h2 = sha512(h1 + bytes([bit])).digest()
     commitment = b64encode(h2).decode("ascii")
 
     return commitment, bit

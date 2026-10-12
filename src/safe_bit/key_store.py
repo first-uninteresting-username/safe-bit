@@ -25,7 +25,8 @@ class KeyStore:
                     key_material BLOB NOT NULL
                                  CHECK (length(key_material) = 32),
                     valid_from   INTEGER NOT NULL CHECK (valid_from >= 0),
-                    valid_until  INTEGER NOT NULL,
+                     valid_until  INTEGER NOT NULL,
+                     release_date INTEGER NOT NULL CHECK (release_date >= valid_until),
                     CHECK (valid_until > valid_from)
                 );
             """)
@@ -35,10 +36,10 @@ class KeyStore:
             raise ValueError(f"Minute {minute} is out of range")
 
         rows = cast(
-            list[tuple[bytes, int, int, int]],
+            list[tuple[bytes, int, int, int, int]],
             self._conn.execute(
                 """
-                SELECT key_material, generation, valid_from, valid_until
+                SELECT key_material, generation, valid_from, valid_until, release_date
                 FROM keys
                 WHERE valid_from <= ? AND valid_until > ?
                 LIMIT 2;
@@ -55,8 +56,10 @@ class KeyStore:
                 f"Multiple keys have overlapping validity ranges at minute {minute}"
             )
 
-        key_material, generation, valid_from, valid_until = rows[0]
-        return Key(key_material, generation, valid_from, valid_until)
+        key_material, generation, valid_from, valid_until, release_date = rows[0]
+        return Key(
+            key_material, generation, valid_from, valid_until, release_date=release_date
+        )
 
     def insert(self, key: Key) -> None:
 
@@ -81,10 +84,17 @@ class KeyStore:
 
             _ = self._conn.execute(
                 """
-                INSERT INTO keys (generation, key_material, valid_from, valid_until)
-                VALUES (?, ?, ?, ?);
+                INSERT INTO keys
+                    (generation, key_material, valid_from, valid_until, release_date)
+                VALUES (?, ?, ?, ?, ?);
                 """,
-                (key.generation, key.material, key.valid_from, key.valid_until),
+                (
+                    key.generation,
+                    key.material,
+                    key.valid_from,
+                    key.valid_until,
+                    key.release_date,
+                ),
             )
             if owns_transaction:
                 _ = self._conn.execute("COMMIT")
@@ -113,7 +123,7 @@ class KeyStore:
         self.insert(key)
         return key
 
-    def ensure_current_key(self, time: int | None = None) -> Key:
+    def ensure_current_key(self, time: int | None = None, allow_creation: bool = True) -> Key:
         if time is None:
                 time = get_current_time()
         _ = self._conn.execute("BEGIN IMMEDIATE")
@@ -122,7 +132,10 @@ class KeyStore:
             try:
                 key = self.get_key_for_minute(minute)
             except NoKeyForMinuteError:
-                key = self.generate_key_and_insert(minute)
+                if allow_creation:
+                    key = self.generate_key_and_insert(minute)
+                else:
+                    raise
             _ = self._conn.execute("COMMIT")
             return key
         except Exception:

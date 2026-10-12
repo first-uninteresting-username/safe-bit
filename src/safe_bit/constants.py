@@ -6,6 +6,9 @@ SECRET_LENGTH = 32
 # Sep 14 2026 00:00:00 UTC
 # 1789344000
 T0 = datetime(2026, 9, 14, 0, 0, 0, tzinfo=UTC)
-# For how long keys are valid (in minutes)
+# How long keys are valid for (in minutes)
 # Week
 KEY_VALIDITY = 10080
+# How long to wait before releasing minutes encrypted with keys
+# 4 times key validity
+RELEASE_DELAY = KEY_VALIDITY * 4
