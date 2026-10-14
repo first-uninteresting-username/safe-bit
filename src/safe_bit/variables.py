@@ -17,3 +17,5 @@ KEY_VALIDITY = 10080
 RELEASE_DELAY = KEY_VALIDITY * 4
 # Default location of the sqlite database for keys
 DB_PATH = Path("/var/lib/safe-bit/app.sqlite3")
+# How much drift between server time and user declared time is allowed
+ALLOWED_DRIFT = 5

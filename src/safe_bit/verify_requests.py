@@ -3,7 +3,7 @@ from re import fullmatch
 
 from pydantic import BaseModel
 
-from .time import get_current_time
+from .variables import ALLOWED_DRIFT
 
 
 class NewBitRequest(BaseModel):
@@ -36,9 +36,7 @@ def verify_valid_b64(s: str) -> None:
         raise NotBase64EncodedError(e)
     return
 
-def verify_get_bit(request: NewBitRequest, allowed_diff: int = 5) -> int:
-    now = get_current_time()
-
+def verify_get_bit(request: NewBitRequest, now: int, allowed_diff: int = ALLOWED_DRIFT) -> int:
     declared_time = request.timestamp if request.timestamp is not None else now
 
     time_diff = now - declared_time
