@@ -4,9 +4,9 @@ from typing import cast
 
 from cryptography.hazmat.primitives.ciphers.aead import ChaCha20Poly1305
 
-from .constants import KEY_VALIDITY
 from .key import Key
 from .time import get_current_time
+from .variables import KEY_VALIDITY
 
 
 class NoKeyForMinuteError(ValueError):

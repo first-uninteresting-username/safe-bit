@@ -2,8 +2,8 @@ from random import randint
 
 from cryptography.hazmat.primitives.ciphers.aead import ChaCha20Poly1305
 
-from safe_bit.constants import KEY_VALIDITY
 from safe_bit.key import Key
+from safe_bit.variables import KEY_VALIDITY
 
 
 def test_encryption_for_all():

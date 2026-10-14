@@ -10,6 +10,7 @@
         cryptography
         ruff
         pytest
+        fastapi[standard]
       '';
     };
   };

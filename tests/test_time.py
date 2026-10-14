@@ -1,9 +1,9 @@
 from datetime import datetime
 from pathlib import Path
 
-from safe_bit.constants import KEY_VALIDITY
 from safe_bit.key_store import KeyStore
 from safe_bit.time import get_date_from_time, get_time
+from safe_bit.variables import KEY_VALIDITY
 
 
 def test_get_time_at_origin(t0_datetime: datetime):

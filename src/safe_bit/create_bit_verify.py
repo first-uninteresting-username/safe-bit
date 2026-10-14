@@ -24,7 +24,7 @@ def _compute_commitment_and_bit(
 
 def create_commited_bit(
     secret: str, timestamp: int, key: Key
-) -> tuple[str, int, int] | None:
+) -> tuple[str, int, int]:
     # Use the stored key for this timestamp again when verifying the commitment.
     commitment, bit = _compute_commitment_and_bit(secret, timestamp, key)
     return commitment, bit, timestamp

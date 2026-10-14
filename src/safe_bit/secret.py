@@ -1,7 +1,7 @@
 from base64 import b64encode
 from secrets import token_bytes
 
-from .constants import SECRET_LENGTH
+from .variables import SECRET_LENGTH
 
 
 def generate_secret(n: int = SECRET_LENGTH) -> bytes:

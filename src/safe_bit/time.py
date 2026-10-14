@@ -1,7 +1,7 @@
 from datetime import UTC, datetime, timedelta
 from math import floor
 
-from .constants import T0
+from .variables import T0
 
 
 def get_time(dt: datetime) -> int:

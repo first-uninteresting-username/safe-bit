@@ -1,6 +1,6 @@
 from cryptography.hazmat.primitives.ciphers.aead import ChaCha20Poly1305
 
-from .constants import RELEASE_DELAY
+from .variables import RELEASE_DELAY
 
 
 class Key:
