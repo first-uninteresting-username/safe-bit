@@ -1,5 +1,6 @@
 from base64 import b64encode
 from datetime import datetime
+from hashlib import sha512
 from sqlite3 import Error
 
 from fastapi import FastAPI, HTTPException
@@ -8,8 +9,9 @@ from fastapi.responses import JSONResponse
 from .create_bit_verify import create_commited_bit, verify_bit_checks
 from .key import Key
 from .key_store import KeyStore, NoKeyForMinuteError, OverlappingKeyRangesError
+from .secret import generate_secret
 from .time import get_current_time, get_date_from_time, get_time
-from .variables import ALLOWED_DRIFT, DB_PATH, RELEASE_DELAY
+from .variables import ALLOWED_DRIFT, DB_PATH, KEY_VALIDITY, RELEASE_DELAY, T0
 from .verify_requests import (
     DeclaredTimeInFutureError,
     DeclaredTimeInPastError,
@@ -155,3 +157,32 @@ def iso_for_time(req: TimestampRequest) -> dict[str, str]:
     Raise HTTP 400 if the timestamp is outside the supported datetime range.
     """
     return {"iso": _iso_for_timestamp(req.timestamp)}
+
+@app.get("/info", summary="Return server information")
+def info() -> JSONResponse:
+    """Return the server's reference date and relase/validity period."""
+    return JSONResponse(
+        content={
+            "reference-date": T0.isoformat(),
+            "key-validity": KEY_VALIDITY,
+            "release-delay": RELEASE_DELAY,
+        }
+    )
+
+@app.get("/secret", summary="Create a secret")
+def secret() -> JSONResponse:
+    """Generate a secret ready to be used in the /get-bit endpoint.
+
+    Returns secret as b64 string, sha512 of the secret bytes and sha512 of the b64 string.
+    """
+    secret = generate_secret()
+    secret_b64 = b64encode(secret).decode("ascii")
+    sha512_secret = sha512(secret).hexdigest()
+    sha512_secret_b64 = sha512(secret_b64.encode("ascii")).hexdigest()
+    return JSONResponse(
+        content={
+            "secret-b64": secret_b64,
+            "sha512-secret": sha512_secret,
+            "sha512-secret-b64": sha512_secret_b64,
+        }
+    )
