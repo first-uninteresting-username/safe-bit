@@ -68,7 +68,7 @@ def health() -> dict[str, str]:
 
     Returns a status of `ok` when the service can handle requests.
     """
-    _ = _get_key(get_current_time())
+    _ = _get_key(get_current_time(), allow_creation=True)
     return {"status": "ok"}
 
 
@@ -99,17 +99,17 @@ def new_bit(req: NewBitRequest) -> dict[str, str | int]:
 def release(req: TimestampRequest) -> JSONResponse:
     """Release b64 encoded locked minute.
 
-    The locked minute is only available after the delay.
+    The locked minute is available at or after its key's stored release date.
 
     Returns timestamp, locked minute and number of key generation
     """
-    available = req.timestamp + RELEASE_DELAY
+    key = _get_key(req.timestamp)
+    available = key.release_date
     if get_current_time() < available:
         return JSONResponse(
             status_code=425,
             content={"locked": True, "available_at": _iso_for_timestamp(available)},
         )
-    key = _get_key(req.timestamp)
     return JSONResponse(
         content={
             "timestamp": req.timestamp,
@@ -134,7 +134,7 @@ def verify(req: VerifyRequest) -> dict[str, bool | dict[str, bool]]:
 
 
 @app.post("/time-for-iso", summary="Convert an ISO 8601 datetime to server time")
-def time_for_iso(req: IsoRequest) -> dict[str, int]:
+async def time_for_iso(req: IsoRequest) -> dict[str, int]:
     """Convert a timezone-aware ISO 8601 datetime to server minutes since D₀.
 
     Returns the timestamp rounded down to a whole minute. Raise HTTP 400 for
@@ -155,7 +155,7 @@ def time_for_iso(req: IsoRequest) -> dict[str, int]:
 
 
 @app.post("/iso-for-time", summary="Convert server time to an ISO 8601 datetime")
-def iso_for_time(req: TimestampRequest) -> dict[str, str]:
+async def iso_for_time(req: TimestampRequest) -> dict[str, str]:
     """Return the ISO 8601 datetime for a server timestamp in minutes since D₀.
 
     Raise HTTP 400 if the timestamp is outside the supported datetime range.
@@ -163,7 +163,7 @@ def iso_for_time(req: TimestampRequest) -> dict[str, str]:
     return {"iso": _iso_for_timestamp(req.timestamp)}
 
 @app.get("/info", summary="Return server information")
-def info() -> JSONResponse:
+async def info() -> JSONResponse:
     """Return the server's reference date and relase/validity period."""
     return JSONResponse(
         content={

@@ -18,7 +18,7 @@ T0 = _t0.astimezone(UTC)
 KEY_VALIDITY = int(environ.get("KEY_VALIDITY", "10080"))
 # How long to wait before releasing minutes encrypted with keys
 # 4 times key validity
-RELEASE_DELAY = int(environ.get("KEY_VALIDITY", "40320"))
+RELEASE_DELAY = int(environ.get("RELEASE_DELAY", "40320"))
 # Default location of the sqlite database for keys
 DB_PATH = Path(environ.get("DB_PATH", "/var/lib/safe-bit/app.sqlite3"))
 # How much drift between server time and user declared time is allowed
