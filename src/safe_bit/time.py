@@ -1,16 +1,15 @@
 from datetime import UTC, datetime, timedelta
-from math import floor
 
 from .variables import T0
 
 
 def get_time(dt: datetime) -> int:
-    diff = dt - T0
-    total_minutes = floor(diff.total_seconds() / 60)
-    return int(total_minutes)
+    return (dt - T0) // timedelta(minutes=1)
+
 
 def get_date_from_time(t: int) -> datetime:
     return T0 + timedelta(minutes=t)
+
 
 def get_current_time() -> int:
     now = datetime.now(UTC)

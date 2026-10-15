@@ -1,20 +1,59 @@
+from base64 import b64encode
+from datetime import datetime
 from sqlite3 import Error
 
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import JSONResponse
 
-from .create_bit_verify import create_commited_bit
-from .key_store import KeyStore, OverlappingKeyRangesError
-from .time import get_current_time
-from .variables import ALLOWED_DRIFT, DB_PATH
+from .create_bit_verify import create_commited_bit, verify_bit_checks
+from .key import Key
+from .key_store import KeyStore, NoKeyForMinuteError, OverlappingKeyRangesError
+from .time import get_current_time, get_date_from_time, get_time
+from .variables import ALLOWED_DRIFT, DB_PATH, RELEASE_DELAY
 from .verify_requests import (
     DeclaredTimeInFutureError,
     DeclaredTimeInPastError,
+    IsoRequest,
     NewBitRequest,
     NotBase64EncodedError,
+    TimestampRequest,
+    VerifyRequest,
     verify_get_bit,
+    verify_valid_b64,
 )
 
 app = FastAPI()
+
+
+def _get_key(timestamp: int, *, allow_creation: bool = False) -> Key:
+    try:
+        store = KeyStore(DB_PATH)
+        try:
+            if allow_creation:
+                return store.ensure_current_key(timestamp, True)
+            return store.get_key_for_minute(timestamp)
+        finally:
+            store.close()
+    except NoKeyForMinuteError as exc:
+        raise HTTPException(404, "No archived key for this timestamp.") from exc
+    except OverlappingKeyRangesError as exc:
+        raise HTTPException(500, "Overlapping key ranges.") from exc
+    except Error as exc:
+        raise HTTPException(500, "Database operation failed.") from exc
+
+
+def _validate_secret(secret: str) -> None:
+    try:
+        verify_valid_b64(secret)
+    except NotBase64EncodedError as exc:
+        raise HTTPException(400, "Secret must be valid Base64.") from exc
+
+
+def _iso_for_timestamp(timestamp: int) -> str:
+    try:
+        return get_date_from_time(timestamp).isoformat()
+    except OverflowError as exc:
+        raise HTTPException(400, "Timestamp is outside the datetime range.") from exc
 
 
 @app.get("/health", summary="Check service health")
@@ -23,56 +62,96 @@ def health() -> dict[str, str]:
 
     Returns a status of `ok` when the service can handle requests.
     """
+    _ = _get_key(get_current_time())
     return {"status": "ok"}
 
 
 @app.post("/new-bit", summary="Create a new bit")
-async def new_bit(req: NewBitRequest) -> dict[str, str | int]:
+def new_bit(req: NewBitRequest) -> dict[str, str | int]:
+    """Get a new bit with b64 encoded secret.
+
+    Returns commitment, bit and timestamp.
+    """
     now = get_current_time()
     try:
         timestamp = verify_get_bit(req, now)
-    except DeclaredTimeInPastError:
+    except DeclaredTimeInPastError as exc:
         raise HTTPException(
-            status_code=400,
-            detail=f"Provided timestamp {req.timestamp} is more than {ALLOWED_DRIFT} minutes in the past. Current time is {now}.",
-        )
-    except DeclaredTimeInFutureError:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Provided timestamp {req.timestamp} is in the future. Current time is {now}."
-        )
-    except NotBase64EncodedError:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Provided secret {req.secret} is not base64 encoded."
-        )
+            400, f"Timestamp must be at most {ALLOWED_DRIFT} minutes in the past."
+        ) from exc
+    except DeclaredTimeInFutureError as exc:
+        raise HTTPException(400, "Timestamp must not be in the future.") from exc
+    except NotBase64EncodedError as exc:
+        raise HTTPException(400, "Secret must be valid Base64.") from exc
 
+    key = _get_key(timestamp, allow_creation=True)
+    commitment, bit, _ = create_commited_bit(req.secret, timestamp, key)
+    return {"commitment": commitment, "bit": bit, "timestamp": timestamp}
+
+
+@app.post("/release", summary="Release a locked minute after the delay")
+def release(req: TimestampRequest) -> JSONResponse:
+    """Release b64 encoded locked minute.
+
+    The locked minute is only available after the delay.
+
+    Returns timestamp, locked minute and number of key generation
+    """
+    available = req.timestamp + RELEASE_DELAY
+    if get_current_time() < available:
+        return JSONResponse(
+            status_code=425,
+            content={"locked": True, "available_at": _iso_for_timestamp(available)},
+        )
+    key = _get_key(req.timestamp)
+    return JSONResponse(
+        content={
+            "timestamp": req.timestamp,
+            "locked_minute": b64encode(key.encrypt_minute(req.timestamp)).decode(
+                "ascii"
+            ),
+            "key_generation": key.generation,
+        }
+    )
+
+
+@app.post("/verify", summary="Verify a committed bit using the key archive")
+def verify(req: VerifyRequest) -> dict[str, bool | dict[str, bool]]:
+    """Verify a committed bit using the archived key for its timestamp.
+
+    Returns the individual checks and whether all checks passed.
+    """
+    _validate_secret(req.secret)
+    key = _get_key(req.timestamp)
+    checks = verify_bit_checks(req.commitment, req.bit, req.timestamp, req.secret, key)
+    return {"valid": all(checks.values()), "checks": checks}
+
+
+@app.post("/time-for-iso", summary="Convert an ISO 8601 datetime to server time")
+def time_for_iso(req: IsoRequest) -> dict[str, int]:
+    """Convert a timezone-aware ISO 8601 datetime to server minutes since D₀.
+
+    Returns the timestamp rounded down to a whole minute. Raise HTTP 400 for
+    invalid datetimes, missing timezones, or timestamps before D₀.
+    """
     try:
-        store = KeyStore(DB_PATH)
-        try:
-            key = store.ensure_current_key(timestamp, True)
-        finally:
-            store.close()
-    except OverlappingKeyRangesError:
+        date = datetime.fromisoformat(req.iso)
+        if date.utcoffset() is None:
+            raise ValueError("A timezone is required")
+        timestamp = get_time(date)
+        if timestamp < 0:
+            raise ValueError("Datetime precedes the reference date")
+    except (ValueError, OverflowError) as exc:
         raise HTTPException(
-            status_code=500,
-            detail="Overlapping key ranges. This should never happen. Contact the entity managing this server."
-        )
-    except Error:
-        raise HTTPException(
-            status_code=500,
-            detail="Database operation failed.",
-        )
+            400, "Expected a timezone-aware datetime on or after D₀."
+        ) from exc
+    return {"timestamp": timestamp}
 
 
-    result = create_commited_bit(req.secret, timestamp, key)
-    commitment, bit, _ = result
-    return {
-        "commitment": commitment,
-        "bit": bit,
-        "timestamp": timestamp,
-        "secret": req.secret,
-    }
+@app.post("/iso-for-time", summary="Convert server time to an ISO 8601 datetime")
+def iso_for_time(req: TimestampRequest) -> dict[str, str]:
+    """Return the ISO 8601 datetime for a server timestamp in minutes since D₀.
 
-
-# @app.get("/new-bit-generate-secret", )
+    Raise HTTP 400 if the timestamp is outside the supported datetime range.
+    """
+    return {"iso": _iso_for_timestamp(req.timestamp)}
