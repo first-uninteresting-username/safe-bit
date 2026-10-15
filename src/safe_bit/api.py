@@ -1,3 +1,4 @@
+import logging
 from base64 import b64encode
 from datetime import datetime
 from hashlib import sha512
@@ -25,6 +26,7 @@ from .verify_requests import (
 )
 
 app = FastAPI()
+logger = logging.getLogger(__name__)
 
 
 def _get_key(timestamp: int, *, allow_creation: bool = False) -> Key:
@@ -39,8 +41,10 @@ def _get_key(timestamp: int, *, allow_creation: bool = False) -> Key:
     except NoKeyForMinuteError as exc:
         raise HTTPException(404, "No archived key for this timestamp.") from exc
     except OverlappingKeyRangesError as exc:
+        logger.exception("Overlapping key ranges")
         raise HTTPException(500, "Overlapping key ranges.") from exc
     except Error as exc:
+        logger.exception("Database operation failed")
         raise HTTPException(500, "Database operation failed.") from exc
 
 
