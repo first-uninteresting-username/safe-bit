@@ -1,6 +1,10 @@
-{ ... }:
+{ pkgs, ... }:
 
 {
+  packages = with pkgs;[
+    prettier
+  ];
+
   languages.python = {
     enable = true;
     venv = {
@@ -15,7 +19,10 @@
     };
   };
 
-  git-hooks.hooks.ruff.enable = true;
+  git-hooks.hooks = {
+    ruff.enable = true;
+    prettier.enable = true;
+  };
 
   scripts = {
     "silence-ruff".exec = "ruff check --fix . && ruff format .";
