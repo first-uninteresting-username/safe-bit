@@ -2,12 +2,15 @@ import logging
 from base64 import b64encode
 from datetime import datetime
 from hashlib import sha512
+from pathlib import Path
 from sqlite3 import Error
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from .create_bit_verify import create_commited_bit, verify_bit_checks
+from .frontend import router as frontend_router
 from .key import Key
 from .key_store import KeyStore, NoKeyForMinuteError, OverlappingKeyRangesError
 from .secret import generate_secret
@@ -26,6 +29,7 @@ from .verify_requests import (
 )
 
 app = FastAPI()
+app.include_router(frontend_router)
 logger = logging.getLogger(__name__)
 
 
@@ -61,6 +65,11 @@ def _iso_for_timestamp(timestamp: int) -> str:
     except OverflowError as exc:
         raise HTTPException(400, "Timestamp is outside the datetime range.") from exc
 
+app.mount(
+    "/static",
+    StaticFiles(directory=Path(__file__).resolve().parent / "web/static"),
+    name="static",
+)
 
 @app.get("/health", summary="Check service health")
 def health() -> dict[str, str]:
@@ -135,10 +144,10 @@ def verify(req: VerifyRequest) -> dict[str, bool | dict[str, bool]]:
 
 @app.post("/time-for-iso", summary="Convert an ISO 8601 datetime to server time")
 async def time_for_iso(req: IsoRequest) -> dict[str, int]:
-    """Convert a timezone-aware ISO 8601 datetime to server minutes since D₀.
+    """Convert a timezone-aware ISO 8601 datetime to server minutes since T₀.
 
     Returns the timestamp rounded down to a whole minute. Raise HTTP 400 for
-    invalid datetimes, missing timezones, or timestamps before D₀.
+    invalid datetimes, missing timezones, or timestamps before T₀.
     """
     try:
         date = datetime.fromisoformat(req.iso)
@@ -149,14 +158,14 @@ async def time_for_iso(req: IsoRequest) -> dict[str, int]:
             raise ValueError("Datetime precedes the reference date")
     except (ValueError, OverflowError) as exc:
         raise HTTPException(
-            400, "Expected a timezone-aware datetime on or after D₀."
+            400, "Expected a timezone-aware datetime on or after T₀."
         ) from exc
     return {"timestamp": timestamp}
 
 
 @app.post("/iso-for-time", summary="Convert server time to an ISO 8601 datetime")
 async def iso_for_time(req: TimestampRequest) -> dict[str, str]:
-    """Return the ISO 8601 datetime for a server timestamp in minutes since D₀.
+    """Return the ISO 8601 datetime for a server timestamp in minutes since T₀.
 
     Raise HTTP 400 if the timestamp is outside the supported datetime range.
     """

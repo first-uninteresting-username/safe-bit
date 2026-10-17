@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}" />
+    <script src="{{ url_for('static', path='/script.js') }}" defer></script>
+    <title>Safe Bit</title>
+  </head>
+  <body>
+    <main>
+      <form id="converter-form" class="request-box">
+        <label for="date-time"
+          >Date & time (ISO-8601) to server time converter</label
+        >
+        <input
+          id="date-time"
+          name="date-time"
+          type="text"
+          placeholder="Enter date & time in ISO-8601 format"
+        />
+        <div class="result">
+          <output id="conversion-result" for="date-time"></output>
+          <button type="button" id="copy-button-converter">Copy</button>
+        </div>
+
+        <div id="datepicker" hidden>
+          <label for="datetime">Select date and time:</label>
+          <input type="datetime-local" id="datetime" name="datetime" />
+        </div>
+
+        <div class="request-actions">
+          <button type="button" id="now-button">Set to now</button>
+          <button type="button" id="toggle-datepicker" aria-expanded="false">
+            Open datepicker
+          </button>
+          <button type="submit" class="primary-button">Convert</button>
+        </div>
+      </form>
+    </main>
+    <footer>
+      <p>
+        Server info: Key validity (minutes): {{ key_validity}} | Release delay
+        (minutes): {{ release_delay }} | 0 time ISO-8601 equivalent: {{ t0 }}
+      </p>
+    </footer>
+  </body>
+</html>
