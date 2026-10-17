@@ -3,7 +3,6 @@ body {
   margin: 0;
   display: flex;
   flex-direction: column;
-  margin: 1.5rem;
 }
 
 main {
@@ -61,4 +60,9 @@ output {
 
 .result:has(output:empty) {
   display: none;
+}
+
+#iso-datetime {
+  width: 100%;
+  box-sizing: border-box;
 }
