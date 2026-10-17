@@ -232,3 +232,4 @@ reference.md
 key-storage-spec.md
 .kilo/
 todo.md
+dev.sqlite3
