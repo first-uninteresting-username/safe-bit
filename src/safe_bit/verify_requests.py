@@ -11,7 +11,7 @@ Timestamp = Annotated[int, Field(strict=True, ge=0, le=2**63 - 1)]
 
 
 class NewBitRequest(BaseModel):
-    secret: str
+    secret_b64: str = Field(alias="secret-b64")
     timestamp: Timestamp | None = None
 
 
@@ -20,7 +20,10 @@ class TimestampRequest(BaseModel):
 
 
 class VerifyRequest(TimestampRequest):
-    secret: str
+    secret_b64: str = Field(alias="secret-b64")
+    sha512_secret_b64: str | None = Field(
+        default=None, alias="sha512-secret-b64", pattern=r"^[0-9a-fA-F]{128}$"
+    )
     commitment: str
     bit: Annotated[int, Field(strict=True, ge=0, le=1)]
 
@@ -83,6 +86,6 @@ def verify_get_bit(
         )
 
     # NotBase64EncodedError is raised by itself
-    _ = verify_valid_b64(request.secret)
+    _ = verify_valid_b64(request.secret_b64)
 
     return declared_time

@@ -2,6 +2,7 @@ import logging
 from base64 import b64encode
 from datetime import datetime
 from hashlib import sha512
+from hmac import compare_digest
 from pathlib import Path
 from sqlite3 import Error
 
@@ -15,7 +16,7 @@ from .key import Key
 from .key_store import KeyStore, NoKeyForMinuteError, OverlappingKeyRangesError
 from .secret import generate_secret
 from .time import get_current_time, get_date_from_time, get_time
-from .variables import ALLOWED_DRIFT, DB_PATH, KEY_VALIDITY, RELEASE_DELAY, T0
+from .variables import ALLOWED_DRIFT, DB_PATH, KEY_VALIDITY, T0
 from .verify_requests import (
     DeclaredTimeInFutureError,
     DeclaredTimeInPastError,
@@ -100,25 +101,14 @@ def new_bit(req: NewBitRequest) -> dict[str, str | int]:
         raise HTTPException(400, "Secret must be valid Base64.") from exc
 
     key = _get_key(timestamp, allow_creation=True)
-    commitment, bit, _ = create_commited_bit(req.secret, timestamp, key)
+    commitment, bit, _ = create_commited_bit(req.secret_b64, timestamp, key)
     return {"commitment": commitment, "bit": bit, "timestamp": timestamp}
 
 
-@app.post("/release", summary="Release a locked minute after the delay")
+@app.post("/release", summary="Release an encrypted minute")
 def release(req: TimestampRequest) -> JSONResponse:
-    """Release b64 encoded locked minute.
-
-    The locked minute is available at or after its key's stored release date.
-
-    Returns timestamp, locked minute and number of key generation
-    """
+    """Return the Base64 encrypted minute using its archived key immediately."""
     key = _get_key(req.timestamp)
-    available = key.release_date
-    if get_current_time() < available:
-        return JSONResponse(
-            status_code=425,
-            content={"locked": True, "available_at": _iso_for_timestamp(available)},
-        )
     return JSONResponse(
         content={
             "timestamp": req.timestamp,
@@ -134,11 +124,18 @@ def release(req: TimestampRequest) -> JSONResponse:
 def verify(req: VerifyRequest) -> dict[str, bool | dict[str, bool]]:
     """Verify a committed bit using the archived key for its timestamp.
 
+    Optionally check sha512-secret-b64 against the SHA-512 hex digest of
+    the secret-b64 text, matching the format returned by /secret.
     Returns the individual checks and whether all checks passed.
     """
-    _validate_secret(req.secret)
+    _validate_secret(req.secret_b64)
     key = _get_key(req.timestamp)
-    checks = verify_bit_checks(req.commitment, req.bit, req.timestamp, req.secret, key)
+    checks = verify_bit_checks(req.commitment, req.bit, req.timestamp, req.secret_b64, key)
+    if req.sha512_secret_b64 is not None:
+        checks["sha512_secret_b64_matches"] = compare_digest(
+            sha512(req.secret_b64.encode("ascii")).hexdigest(),
+            req.sha512_secret_b64.lower(),
+        )
     return {"valid": all(checks.values()), "checks": checks}
 
 
@@ -173,18 +170,17 @@ async def iso_for_time(req: TimestampRequest) -> dict[str, str]:
 
 @app.get("/info", summary="Return server information")
 async def info() -> JSONResponse:
-    """Return the server's reference date and relase/validity period."""
+    """Return the server's reference date and key validity period."""
     return JSONResponse(
         content={
             "reference-date": T0.isoformat(),
             "key-validity": KEY_VALIDITY,
-            "release-delay": RELEASE_DELAY,
         }
     )
 
 @app.get("/secret", summary="Create a secret")
 def secret() -> JSONResponse:
-    """Generate a secret ready to be used in the /get-bit endpoint.
+    """Generate a secret ready to be used in the /new-bit endpoint.
 
     Returns secret as b64 string, sha512 of the secret bytes and sha512 of the b64 string.
     """

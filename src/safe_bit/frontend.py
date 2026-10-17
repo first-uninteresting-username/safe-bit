@@ -4,7 +4,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
-from .variables import KEY_VALIDITY, RELEASE_DELAY, T0
+from .variables import KEY_VALIDITY, T0
 
 router = APIRouter()
 templates = Jinja2Templates(
@@ -18,7 +18,6 @@ def home(request: Request):
         name="index.html",
         context={
             "key_validity": KEY_VALIDITY,
-            "release_delay": RELEASE_DELAY,
             "t0": T0.isoformat(),
         },
     )
