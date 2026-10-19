@@ -65,3 +65,36 @@ document
     const input = document.getElementById("conversion-result");
     await navigator.clipboard.writeText(input.textContent);
   });
+
+document
+  .getElementById("secret-get-form")
+  .addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const output = document.getElementById("secret-json-field");
+
+    try {
+      const response = await fetch("/secret");
+      if (!response.ok) {
+        throw new Error("Secret request failed");
+      }
+      const data = await response.json();
+      output.textContent = JSON.stringify(data, null, 2);
+    } catch {
+      output.textContent = "Could not fetch secret. Please try again.";
+    }
+    output.hidden = false;
+  });
+
+function validateJson(field) {
+  try {
+    JSON.parse(field.value);
+    field.setAttribute("aria-invalid", "false");
+  } catch {
+    field.setAttribute("aria-invalid", "true");
+  }
+}
+
+document.querySelectorAll(".json-field").forEach((field) => {
+  field.addEventListener("input", () => validateJson(field));
+  validateJson(field);
+});

@@ -14,7 +14,6 @@
           <label for="datetime">Select date and time:</label>
           <input type="datetime-local" id="datetime" name="datetime" />
         </div>
-
         <div id="iso-datepicker" hidden>
           <input
             id="iso-datetime"
@@ -23,18 +22,53 @@
             placeholder="Enter date & time in ISO-8601 format"
           />
         </div>
-
         <div class="result">
           <output id="conversion-result" for="date-time"></output>
           <button type="button" id="copy-button-converter">Copy</button>
         </div>
-
         <div class="request-actions">
           <button type="button" id="now-button">Set to now</button>
           <button type="button" id="toggle-datepicker" aria-expanded="false">
             Open datepicker
           </button>
           <button type="submit" class="primary-button">Convert</button>
+        </div>
+      </form>
+
+      <form id="secret-get-form" class="request-box">
+        <pre class="json-output" id="secret-json-field" hidden="true"></pre>
+        <div class="request-actions">
+          <button type="submit" class="primary-button">Generate secret</button>
+        </div>
+      </form>
+
+      <form id="bit-request-form" class="request-box">
+        <textarea
+          id="bit-request-text"
+          name="bit-request"
+          rows="10"
+          cols="50"
+          class="json-field"
+        ></textarea>
+        <script>
+          const input = document.getElementById("bit-request-text");
+
+          const data = {
+            "secret-b64": "",
+            timestamp: 12345,
+          };
+
+          input.value = JSON.stringify(data, null, 2);
+        </script>
+
+        <div class="request-actions">
+          <button type="button" id="bit-set-date">
+            Set date chosen in the datepicker
+          </button>
+          <button type="button" id="bit-set-secret">
+            Set secret generated in the generator
+          </button>
+          <button type="bit-submit" class="primary-button">Submit</button>
         </div>
       </form>
     </main>

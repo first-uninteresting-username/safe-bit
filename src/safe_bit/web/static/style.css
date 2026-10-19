@@ -62,6 +62,18 @@ output {
   display: none;
 }
 
+.json-field[aria-invalid="true"] {
+  background-color: #f00;
+}
+
+.json-output {
+  padding: 1rem;
+  border-radius: 8px;
+  background: #f4f4f5;
+  font-family: monospace;
+  overflow-x: auto;
+}
+
 #iso-datetime {
   width: 100%;
   box-sizing: border-box;
