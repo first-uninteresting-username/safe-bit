@@ -1,12 +1,38 @@
-async function convert_iso() {
+function getDisplayedTimestamp() {
+  const value = document.getElementById("conversion-result").textContent.trim();
+  if (!/^\d+$/.test(value)) {
+    return null;
+  }
+
+  const timestamp = Number(value);
+  return Number.isSafeInteger(timestamp) ? timestamp : null;
+}
+
+function getDisplayedSecret() {
+  const value = document.getElementById("secret-json-field").textContent;
+  let data;
+  try {
+    data = JSON.parse(value);
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      return null;
+    }
+    throw error;
+  }
+
+  const secret = data?.["secret-b64"];
+  return typeof secret === "string" && secret !== "" ? secret : null;
+}
+
+async function convert_iso(iso_override = null) {
   const iso_input = document.getElementById("iso-datetime");
   const input = document.getElementById("datetime");
   const output = document.getElementById("conversion-result");
 
-  const iso_value = iso_input.value.trim();
+  const iso_value = iso_override ?? iso_input.value.trim();
   if (iso_value === "" && input.value === "") {
     output.textContent = "Select a date and time or enter an ISO datetime";
-    return;
+    return null;
   }
 
   const field =
@@ -24,6 +50,7 @@ async function convert_iso() {
 
   const data = await response.json();
   output.textContent = response.ok ? data.timestamp : "Conversion failed";
+  return response.ok ? data.timestamp : null;
 }
 
 document
@@ -70,20 +97,40 @@ document
   .getElementById("secret-get-form")
   .addEventListener("submit", async (event) => {
     event.preventDefault();
-    const output = document.getElementById("secret-json-field");
-
-    try {
-      const response = await fetch("/secret");
-      if (!response.ok) {
-        throw new Error("Secret request failed");
-      }
-      const data = await response.json();
-      output.textContent = JSON.stringify(data, null, 2);
-    } catch {
-      output.textContent = "Could not fetch secret. Please try again.";
-    }
-    output.hidden = false;
+    await generateSecret();
   });
+
+document.getElementById("bit-set-secret").addEventListener("click", () => {
+  const secret = getDisplayedSecret();
+  if (secret === null) {
+    alert("Generate a secret first.");
+    return;
+  }
+
+  const input = document.getElementById("bit-request-text");
+  const data = JSON.parse(input.value);
+  data["secret-b64"] = secret;
+  input.value = JSON.stringify(data, null, 2);
+});
+
+document.getElementById("bit-set-date").addEventListener("click", async () => {
+  const datepicker = document.getElementById("datetime");
+  const date = new Date(datepicker.value);
+  if (Number.isNaN(date.getTime())) {
+    alert("Select a date and time in the datepicker first.");
+    return;
+  }
+
+  const timestamp = await convert_iso(date.toISOString());
+  if (timestamp === null) {
+    return;
+  }
+
+  const input = document.getElementById("bit-request-text");
+  const data = JSON.parse(input.value);
+  data.timestamp = timestamp;
+  input.value = JSON.stringify(data, null, 2);
+});
 
 function validateJson(field) {
   try {
