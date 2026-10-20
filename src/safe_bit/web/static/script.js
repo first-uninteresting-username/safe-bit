@@ -24,6 +24,25 @@ function getDisplayedSecret() {
   return typeof secret === "string" && secret !== "" ? secret : null;
 }
 
+async function generateSecret() {
+  const output = document.getElementById("secret-json-field");
+  output.hidden = false;
+  output.textContent = "Generating secret…";
+
+  try {
+    const response = await fetch("/secret");
+    if (!response.ok) {
+      output.textContent = "Secret generation failed. Please try again.";
+      return;
+    }
+
+    const data = await response.json();
+    output.textContent = JSON.stringify(data, null, 2);
+  } catch {
+    output.textContent = "Secret generation failed. Please try again.";
+  }
+}
+
 async function convert_iso(iso_override = null) {
   const iso_input = document.getElementById("iso-datetime");
   const input = document.getElementById("datetime");
@@ -140,6 +159,13 @@ function validateJson(field) {
     field.setAttribute("aria-invalid", "true");
   }
 }
+
+const bitRequestInput = document.getElementById("bit-request-text");
+const initialBitRequest = {
+  "secret-b64": "",
+  timestamp: 12345,
+};
+bitRequestInput.value = JSON.stringify(initialBitRequest, null, 2);
 
 document.querySelectorAll(".json-field").forEach((field) => {
   field.addEventListener("input", () => validateJson(field));
