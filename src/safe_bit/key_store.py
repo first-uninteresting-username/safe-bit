@@ -26,20 +26,23 @@ class KeyStore:
                                  CHECK (length(key_material) = 32),
                     valid_from   INTEGER NOT NULL CHECK (valid_from >= 0),
                      valid_until  INTEGER NOT NULL,
-                     release_date INTEGER NOT NULL CHECK (release_date >= valid_until),
                     CHECK (valid_until > valid_from)
                 );
             """)
+        # Keep existing archives usable after removing the release-date field.
+        columns = self._conn.execute("PRAGMA table_info(keys)").fetchall()
+        if any(column[1] == "release_date" for column in columns):
+            _ = self._conn.execute("ALTER TABLE keys DROP COLUMN release_date")
 
     def get_key_for_minute(self, minute: int) -> Key:
         if minute < 0 or minute >= 2**64:
             raise ValueError(f"Minute {minute} is out of range")
 
         rows = cast(
-            list[tuple[bytes, int, int, int, int]],
+            list[tuple[bytes, int, int, int]],
             self._conn.execute(
                 """
-                SELECT key_material, generation, valid_from, valid_until, release_date
+                SELECT key_material, generation, valid_from, valid_until
                 FROM keys
                 WHERE valid_from <= ? AND valid_until > ?
                 LIMIT 2;
@@ -56,10 +59,8 @@ class KeyStore:
                 f"Multiple keys have overlapping validity ranges at minute {minute}"
             )
 
-        key_material, generation, valid_from, valid_until, release_date = rows[0]
-        return Key(
-            key_material, generation, valid_from, valid_until, release_date=release_date
-        )
+        key_material, generation, valid_from, valid_until = rows[0]
+        return Key(key_material, generation, valid_from, valid_until)
 
     def insert(self, key: Key) -> None:
 
@@ -85,15 +86,14 @@ class KeyStore:
             _ = self._conn.execute(
                 """
                 INSERT INTO keys
-                    (generation, key_material, valid_from, valid_until, release_date)
-                VALUES (?, ?, ?, ?, ?);
+                    (generation, key_material, valid_from, valid_until)
+                VALUES (?, ?, ?, ?);
                 """,
                 (
                     key.generation,
                     key.material,
                     key.valid_from,
                     key.valid_until,
-                    key.release_date,
                 ),
             )
             if owns_transaction:

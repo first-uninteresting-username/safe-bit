@@ -72,6 +72,51 @@ async function convert_iso(iso_override = null) {
   return response.ok ? data.timestamp : null;
 }
 
+async function generateBit() {
+  const input = document.getElementById("bit-request-text");
+  const output = document.getElementById("bit-json-field");
+  output.hidden = false;
+  output.textContent = "Creating bit…";
+
+  let request;
+  try {
+    request = JSON.parse(input.value);
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      output.textContent = "Enter valid JSON before creating a bit.";
+      return;
+    }
+    throw error;
+  }
+
+  try {
+    const response = await fetch("/new-bit", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(request),
+    });
+    if (!response.ok) {
+      output.textContent =
+        "Bit creation failed. Check your secret and timestamp and try again.";
+      return;
+    }
+
+    const data = await response.json();
+    output.textContent = JSON.stringify(data, null, 2);
+  } catch {
+    output.textContent = "Bit creation failed. Please try again.";
+  }
+}
+
+document
+  .getElementById("bit-request-form")
+  .addEventListener("submit", async (event) => {
+    event.preventDefault();
+    await generateBit();
+  });
+
 document
   .getElementById("converter-form")
   .addEventListener("submit", (event) => {
