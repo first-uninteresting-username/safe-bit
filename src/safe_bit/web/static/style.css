@@ -7,6 +7,13 @@ body {
 
 main {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 33rem;
+  margin: 0 auto;
+  box-sizing: border-box;
   padding: 1.5rem;
 }
 
@@ -27,7 +34,6 @@ output {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  max-width: 30rem;
   padding: 1.5rem;
   border: 0.5rem solid #215;
   border-radius: 1rem;
@@ -60,6 +66,11 @@ output {
 
 .result:has(output:empty) {
   display: none;
+}
+
+.json-field {
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .json-field[aria-invalid="true"] {
