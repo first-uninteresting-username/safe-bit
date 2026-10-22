@@ -1,3 +1,5 @@
+// Functions
+
 function getDisplayedTimestamp() {
   const value = document.getElementById("conversion-result").textContent.trim();
   if (!/^\d+$/.test(value)) {
@@ -110,12 +112,74 @@ async function generateBit() {
   }
 }
 
-document
-  .getElementById("bit-request-form")
-  .addEventListener("submit", async (event) => {
-    event.preventDefault();
-    await generateBit();
-  });
+async function validateBit() {
+  const input = document.getElementById("verify-request-text");
+  const output = document.getElementById("verify-json-field");
+  output.hidden = false;
+  output.textContent = "Veryfing bit…";
+
+  let request;
+  try {
+    request = JSON.parse(input.value);
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      output.textContent = "Enter valid JSON before validating a bit.";
+      return;
+    }
+    throw error;
+  }
+
+  try {
+    const response = await fetch("/new-bit", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(request),
+    });
+    if (!response.ok) {
+      output.textContent =
+        "Bit validation failed. This most likely means the request is malformed.";
+      return;
+    }
+
+    const data = await response.json();
+    output.textContent = JSON.stringify(data, null, 2);
+  } catch {
+    output.textContent =
+      "Validation failed. Please try again. This most likely means the request is malformed.";
+  }
+}
+
+function validateJson(field) {
+  try {
+    JSON.parse(field.value);
+    field.setAttribute("aria-invalid", "false");
+  } catch {
+    field.setAttribute("aria-invalid", "true");
+  }
+}
+
+// Initial form values
+
+const bitRequestInput = document.getElementById("bit-request-text");
+const initialBitRequest = {
+  "secret-b64": "",
+  timestamp: 12345,
+};
+bitRequestInput.value = JSON.stringify(initialBitRequest, null, 2);
+
+const verifyRequestInput = document.getElementById("verify-request-text");
+const initialVerifyRequest = {
+  "secret-b64": "",
+  "sha512-secret-b64": null,
+  timestamp: 12345,
+  commitment: "",
+  bit: 0,
+};
+verifyRequestInput.value = JSON.stringify(initialVerifyRequest, null, 2);
+
+// Datetime converter events
 
 document
   .getElementById("converter-form")
@@ -157,11 +221,22 @@ document
     await navigator.clipboard.writeText(input.textContent);
   });
 
+// Secret generation events
+
 document
   .getElementById("secret-get-form")
   .addEventListener("submit", async (event) => {
     event.preventDefault();
     await generateSecret();
+  });
+
+// Bit creation events
+
+document
+  .getElementById("bit-request-form")
+  .addEventListener("submit", async (event) => {
+    event.preventDefault();
+    await generateBit();
   });
 
 document.getElementById("bit-set-secret").addEventListener("click", () => {
@@ -196,21 +271,16 @@ document.getElementById("bit-set-date").addEventListener("click", async () => {
   input.value = JSON.stringify(data, null, 2);
 });
 
-function validateJson(field) {
-  try {
-    JSON.parse(field.value);
-    field.setAttribute("aria-invalid", "false");
-  } catch {
-    field.setAttribute("aria-invalid", "true");
-  }
-}
+// Bit validation events
 
-const bitRequestInput = document.getElementById("bit-request-text");
-const initialBitRequest = {
-  "secret-b64": "",
-  timestamp: 12345,
-};
-bitRequestInput.value = JSON.stringify(initialBitRequest, null, 2);
+document
+  .getElementById("verify-request-form")
+  .addEventListener("submit", async (event) => {
+    event.preventDefault();
+    await validateBit();
+  });
+
+// Validate JSON fields after setting their initial values.
 
 document.querySelectorAll(".json-field").forEach((field) => {
   field.addEventListener("input", () => validateJson(field));
