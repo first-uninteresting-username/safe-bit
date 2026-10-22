@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Privacy Policy - Safe Bit</title>
+  </head>
+  <body>
+    <h1>Privacy Policy</h1>
+    <p>Last updated: 2026-10-22</p>
+
+    <h2>Who runs this service</h2>
+    {% if operator_name %}
+    <p>This Safe Bit instance is operated by {{ operator_name }}.</p>
+    {% else %}
+    <p>This Safe Bit instance's operator has not set a name.</p>
+    {% endif %}{% if contact_email %}
+    <p>
+      You can contact us at
+      <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>.
+    </p>
+    {% else %}
+    <p>The operator has not set a contact address.</p>
+    {% endif %}
+
+    <h2>What this service does</h2>
+    <p>
+      Safe Bit creates and verifies committed bits. You send a secret and a
+      timestamp, and the service returns a commitment and a bit. Later, you can
+      send them back to check that they match.
+    </p>
+
+    <h2>Data we process</h2>
+    <ul>
+      <li>
+        Secrets, timestamps, commitments and bits that you send in requests.
+        They are used only to answer that request.
+      </li>
+      <li>
+        Your IP address and request metadata, which your connection necessarily
+        reveals to the server so it can respond to you.
+      </li>
+    </ul>
+    <p>
+      Do not put personal data in your secrets. We cannot tell what a secret
+      contains.
+    </p>
+
+    <h2>Data we store</h2>
+    <p>
+      The only data stored in the service's database is its encryption keys,
+      with the time range each key is valid for. The keys are generated randomly
+      and contain no personal data.
+    </p>
+    <p>
+      We do not store the secrets, commitments or bits that you send. We do not
+      have user accounts.
+    </p>
+
+    <h2>Logs</h2>
+    <p>
+      The application does not write access logs. It logs only errors, and error
+      logs do not record request contents.
+    </p>
+    {% if hosting_log_note %}
+    <p>{{ hosting_log_note }}</p>
+    {% endif %}
+
+    <h2>Cookies, tracking and third parties</h2>
+    <p>
+      This site does not set cookies, does not store data in your browser, and
+      does not use analytics, advertising or tracking. The pages load only files
+      from this server, with no third-party scripts, fonts or images. We do not
+      sell or share your data.
+    </p>
+
+    <h2>Your rights</h2>
+    <p>
+      Because we do not keep personal data about you, there is usually nothing
+      to access, correct or delete. If you believe we hold data about you, or
+      you have a question about this policy, contact us{% if contact_email %} at
+      {{ contact_email }}{% endif %}.
+    </p>
+
+    <h2>Changes to this policy</h2>
+    <p>
+      If this policy changes, we will update the date at the top of this page.
+    </p>
+
+    <p><a href="/">Back to Safe Bit</a></p>
+  </body>
+</html>

@@ -4,7 +4,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
-from .variables import KEY_VALIDITY, T0
+from .variables import CONTACT_EMAIL, HOSTING_LOG_NOTE, KEY_VALIDITY, OPERATOR_NAME, T0
 
 router = APIRouter()
 templates = Jinja2Templates(
@@ -19,5 +19,17 @@ def home(request: Request):
         context={
             "key_validity": KEY_VALIDITY,
             "t0": T0.isoformat(),
+        },
+    )
+
+@router.get("/privacy", response_class=HTMLResponse)
+def privacy(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="privacy.html",
+        context={
+            "operator_name": OPERATOR_NAME,
+            "contact_email": CONTACT_EMAIL,
+            "hosting_log_note": HOSTING_LOG_NOTE,
         },
     )

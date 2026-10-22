@@ -20,3 +20,10 @@ KEY_VALIDITY = int(environ.get("KEY_VALIDITY", "10080"))
 DB_PATH = Path(environ.get("DB_PATH", "/var/lib/safe-bit/app.sqlite3"))
 # How much drift between server time and user declared time is allowed
 ALLOWED_DRIFT = int(environ.get("ALLOWED_DRIFT", "5"))
+# Shown on the privacy policy page. Each deployment sets its own.
+# Who runs this instance
+OPERATOR_NAME = environ.get("OPERATOR_NAME", "")
+# Where people can reach the operator about privacy questions
+CONTACT_EMAIL = environ.get("CONTACT_EMAIL", "")
+# Optional: describe logs kept outside the app (reverse proxy, host, firewall)
+HOSTING_LOG_NOTE = environ.get("HOSTING_LOG_NOTE", "")
