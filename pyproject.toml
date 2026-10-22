@@ -18,6 +18,9 @@ dependencies = [
 [dependency-groups]
 dev = [
   "pytest>=8",
+  "cryptography",
+  "fastapi[standard]",
+  "ruff",
 ]
 
 [tool.hatch.build.targets.wheel]
