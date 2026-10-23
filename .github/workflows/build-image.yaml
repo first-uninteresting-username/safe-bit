@@ -14,7 +14,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - name: Compute image name and tags
         id: meta
         run: |
@@ -25,7 +25,7 @@ jobs:
 
       - name: Build image with Buildah
         id: build
-        uses: redhat-actions/buildah-build@v3
+        uses: redhat-actions/buildah-build@719e3c40d8af9790c23eca13f7daa339f2867034 # v3
         with:
           image: ${{ steps.meta.outputs.image }}
           tags: ${{ steps.meta.outputs.tags }}
@@ -33,14 +33,14 @@ jobs:
           context: .
 
       - name: Log in to GHCR
-        uses: redhat-actions/podman-login@v2
+        uses: redhat-actions/podman-login@50c2d9a331bb67c8fdab99b86455fad05e2e3252 # v2
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push to GHCR
-        uses: redhat-actions/push-to-registry@v3
+        uses: redhat-actions/push-to-registry@94ade333c38ecc0e60e94785125d9a52ca423b37 # v3
         with:
           image: ${{ steps.build.outputs.image }}
           tags: ${{ steps.build.outputs.tags }}
