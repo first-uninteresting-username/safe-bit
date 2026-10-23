@@ -1,0 +1,47 @@
+name: Build OCI image
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Compute image name and tags
+        id: meta
+        run: |
+          {
+            echo "image=${GITHUB_REPOSITORY,,}"
+            echo "tags=latest sha-${GITHUB_SHA::7} $(date -u +%Y%m%d)"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Build image with Buildah
+        id: build
+        uses: redhat-actions/buildah-build@v3
+        with:
+          image: ${{ steps.meta.outputs.image }}
+          tags: ${{ steps.meta.outputs.tags }}
+          containerfiles: ./Containerfile
+          context: .
+
+      - name: Log in to GHCR
+        uses: redhat-actions/podman-login@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push to GHCR
+        uses: redhat-actions/push-to-registry@v3
+        with:
+          image: ${{ steps.build.outputs.image }}
+          tags: ${{ steps.build.outputs.tags }}
+          registry: ${{ env.REGISTRY }}

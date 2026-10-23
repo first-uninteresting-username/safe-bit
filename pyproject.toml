@@ -15,6 +15,9 @@ dependencies = [
   "fastapi[standard]",
 ]
 
+[project.scripts]
+safe-bit = "safe_bit.main:main"
+
 [dependency-groups]
 dev = [
   "pytest>=8",
