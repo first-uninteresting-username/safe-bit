@@ -5,11 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link
       rel="icon"
-      href="{{ url_for('static', path='/favicon.svg') }}"
+      href="{{ url_for('static', path='/favicon.svg').path }}"
       type="image/svg+xml"
     />
-    <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}" />
-    <script src="{{ url_for('static', path='/script.js') }}" defer></script>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', path='/style.css').path }}"
+    />
+    <script
+      src="{{ url_for('static', path='/script.js').path }}"
+      defer
+    ></script>
     <title>Safe Bit</title>
   </head>
   <body>
@@ -83,7 +89,7 @@
       <p>
         Server info: Key validity (minutes): {{ key_validity}} | Server time
         start ISO-8601 timestamp: {{ t0 }} |
-        <a href="{{ url_for('privacy') }}">Privacy policy</a> |
+        <a href="{{ url_for('privacy').path }}">Privacy policy</a> |
         <a href="{{ source_code_link }}">Source code</a>
       </p>
     </footer>
