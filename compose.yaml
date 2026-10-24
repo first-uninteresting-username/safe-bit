@@ -2,13 +2,14 @@ services:
   safe-bit:
     image: ghcr.io/first-uninteresting-username/safe-bit:latest
     ports:
-      - "8000:8000" # Adjust the port if needed
+      - "127.0.0.1:8000:8000" # Adjust the port if needed
     volumes:
       - safe-bit-data:/var/lib/safe-bit
     restart: unless-stopped
     read_only: true # the app only writes to the data volume
     tmpfs:
-      - /tmp # scratch space for SQLite temp files, since the root fs is read-only
+      # scratch space for SQLite temp files, since the root fs is read-only;
+      - /tmp:rw,noexec,nosuid,nodev,size=64m
     cap_drop:
       - ALL
     security_opt:

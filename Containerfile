@@ -13,6 +13,7 @@ RUN useradd --system --uid 10001 --no-create-home --shell /usr/sbin/nologin safe
  && chown safe-bit:safe-bit /var/lib/safe-bit
 VOLUME ["/var/lib/safe-bit"]
 USER 10001
+ENV PYTHONDONTWRITEBYTECODE=1
 ENV HOST=0.0.0.0
 ENV PORT=8000
 ENV DB_PATH=/var/lib/safe-bit/app.sqlite3

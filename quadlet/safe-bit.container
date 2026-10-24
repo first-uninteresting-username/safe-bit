@@ -1,0 +1,39 @@
+[Unit]
+Description=safe-bit
+After=network-online.target
+Wants=network-online.target
+
+[Container]
+Image=ghcr.io/first-uninteresting-username/safe-bit:latest
+ContainerName=safe-bit
+PublishPort=127.0.0.1:8000:8000
+# Referencing the .volume file makes systemd create the volume first.
+Volume=safe-bit-data.volume:/var/lib/safe-bit
+
+# The app only writes to the data volume.
+ReadOnly=true
+# Scratch space for SQLite temp files, since the root fs is read-only.
+Tmpfs=/tmp:rw,noexec,nosuid,nodev,size=64m
+DropCapability=ALL
+NoNewPrivileges=true
+
+# How long (bytes) should the default secret length be
+Environment=SECRET_LENGTH=32
+# ISO 8601 date marking minute 0. DO NOT CHANGE AFTER INITIALIZATION
+Environment=T0=2026-09-14T00:00:00+00:00
+# How long should keys be valid for in minutes
+Environment=KEY_VALIDITY=10080
+# How much drift between server time and time declared by user is allowed in minutes
+Environment=ALLOWED_DRIFT=5
+# Operator name (for privacy policy)
+Environment="OPERATOR_NAME=John Doe"
+# Operator email (for privacy policy)
+Environment=CONTACT_EMAIL=john.doe@example.com
+# Describe logs kept outside the app (for privacy policy)
+Environment=HOSTING_LOG_NOTE=
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target

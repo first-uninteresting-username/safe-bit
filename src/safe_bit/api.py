@@ -193,5 +193,8 @@ def secret() -> JSONResponse:
             "secret-b64": secret_b64,
             "sha512-secret": sha512_secret,
             "sha512-secret-b64": sha512_secret_b64,
-        }
+        },
+        # Each response is a fresh secret: it must never be stored or shared by
+        # browsers, proxies, or CDNs.
+        headers={"Cache-Control": "no-store"},
     )
