@@ -1,9 +1,9 @@
-FROM docker.io/library/python:3.14-slim@sha256:0514bc76712d64f8bb48adcb95b1ab0d88c69fee95d62fe4c18ee948bee9b1e1 as builder
+FROM docker.io/library/python:3.15-slim@sha256:044d5bd747976e21f8bc4d746c3479b19a84bb8ae6261b802acdd26b29036c93 as builder
 
 COPY pyproject.toml, README.md, LICENSE, src/ ./
 RUN pip install --prefix=/install .
 
-FROM docker.io/library/python:3.14-slim@sha256:0514bc76712d64f8bb48adcb95b1ab0d88c69fee95d62fe4c18ee948bee9b1e1
+FROM docker.io/library/python:3.15-slim@sha256:044d5bd747976e21f8bc4d746c3479b19a84bb8ae6261b802acdd26b29036c93
 
 COPY --from=builder /install /usr/local
 RUN useradd --system --uid 10001 --no-create-home safebit \
