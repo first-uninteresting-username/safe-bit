@@ -82,3 +82,7 @@ The whole procedure is explained in [a dedicated doc](/docs/usage.md).
 TL;DR: Use devenv; run `dev-bash` to launch the dev server.
 
 [CONTRIBUTING.md](CONTRIBUTING.md)
+
+## Attributions
+
+- icon lock locked by SUBAIDA from <a href="https://thenounproject.com/browse/icons/term/lock-locked/" target="_blank" title="lock locked Icons">Noun Project</a> (CC BY 3.0)
