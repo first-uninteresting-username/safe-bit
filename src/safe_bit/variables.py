@@ -27,3 +27,10 @@ OPERATOR_NAME = environ.get("OPERATOR_NAME", "")
 CONTACT_EMAIL = environ.get("CONTACT_EMAIL", "")
 # Optional: describe logs kept outside the app (reverse proxy, host, firewall)
 HOSTING_LOG_NOTE = environ.get("HOSTING_LOG_NOTE", "")
+# Linked in the page footer. AGPL requires offering the source of modified versions
+# to users, so point this at your fork if you changed the code.
+SOURCE_CODE_LINK = environ.get(
+    "SOURCE_CODE_LINK", "https://github.com/first-uninteresting-username/safe-bit"
+)
+if not SOURCE_CODE_LINK.startswith(("http://", "https://")):
+    raise ValueError("SOURCE_CODE_LINK must be an http(s) URL")

@@ -4,7 +4,14 @@ from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
-from .variables import CONTACT_EMAIL, HOSTING_LOG_NOTE, KEY_VALIDITY, OPERATOR_NAME, T0
+from .variables import (
+    CONTACT_EMAIL,
+    HOSTING_LOG_NOTE,
+    KEY_VALIDITY,
+    OPERATOR_NAME,
+    SOURCE_CODE_LINK,
+    T0,
+)
 
 router = APIRouter()
 templates = Jinja2Templates(
@@ -19,6 +26,7 @@ def home(request: Request):
         context={
             "key_validity": KEY_VALIDITY,
             "t0": T0.isoformat(),
+            "source_code_link": SOURCE_CODE_LINK,
         },
     )
 

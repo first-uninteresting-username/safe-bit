@@ -22,6 +22,7 @@ services:
       OPERATOR_NAME: "John Doe" # Operator name (for privacy policy)
       CONTACT_EMAIL: "john.doe@example.com" # Operator email (for privacy policy)
       HOSTING_LOG_NOTE: "" # Describe logs kept outside the app (for privacy policy)
+      # SOURCE_CODE_LINK: "https://github.com/first-uninteresting-username/safe-bit" # Footer link to the source code. Set to your fork if modified
 
 volumes:
   safe-bit-data:

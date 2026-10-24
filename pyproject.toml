@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "safe-bit"
 version = "0.1.0"
-description = "Add your description here"
+description = "Web service for generating bits of informations securely"
 readme = "README.md"
 license = "AGPL-3.0-only"
 license-files = ["LICENSE"]

@@ -9,11 +9,11 @@ from .variables import DB_PATH
 
 
 def main() -> None:
-    host = environ.get("HOST", "127.0.0.1")
-    port = int(environ.get("PORT", "8000"))
+    host = environ.get("SAFE_BIT_HOST", "127.0.0.1")
+    port = int(environ.get("SAFE_BIT_PORT", "8000"))
 
     if not 1 <= port <= 65535:
-        raise ValueError("PORT must be between 1 and 65535")
+        raise ValueError("SAFE_BIT_PORT must be between 1 and 65535")
 
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
 

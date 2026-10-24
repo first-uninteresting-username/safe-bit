@@ -31,6 +31,8 @@ Environment="OPERATOR_NAME=John Doe"
 Environment=CONTACT_EMAIL=john.doe@example.com
 # Describe logs kept outside the app (for privacy policy)
 Environment=HOSTING_LOG_NOTE=
+# Footer link to the source code. Set to your fork if modified
+#Environment=SOURCE_CODE_LINK=https://github.com/first-uninteresting-username/safe-bit
 
 [Service]
 Restart=always
