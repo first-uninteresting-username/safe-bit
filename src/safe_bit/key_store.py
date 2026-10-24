@@ -27,7 +27,7 @@ class KeyStore:
                     key_material BLOB NOT NULL
                                  CHECK (length(key_material) = 32),
                     valid_from   INTEGER NOT NULL CHECK (valid_from >= 0),
-                     valid_until  INTEGER NOT NULL,
+                    valid_until  INTEGER NOT NULL,
                     CHECK (valid_until > valid_from)
                 );
             """)

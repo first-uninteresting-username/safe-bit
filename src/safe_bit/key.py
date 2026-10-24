@@ -15,8 +15,6 @@ class Key:
             raise ValueError("Generation must fit an unsigned 32-bit integer")
         if not 0 <= valid_from < valid_until:
             raise ValueError("Validity must satisfy 0 <= valid_from < valid_until")
-        if valid_from > valid_until:
-            raise ValueError("Valid from must be less than valid until")
 
         self.material: bytes = material
         self.generation: int = generation
