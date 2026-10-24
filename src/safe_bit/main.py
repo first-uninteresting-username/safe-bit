@@ -21,14 +21,18 @@ def main() -> None:
         level=ERROR,
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
         handlers=[
-                StreamHandler(sys_stderr),
-            ],
+            StreamHandler(sys_stderr),
+        ],
     )
 
     uvicorn_run(
-        "safe_bit.api:app", host=host, port=port,
-        access_log=False, log_level="error",
+        "safe_bit.api:app",
+        host=host,
+        port=port,
+        access_log=False,
+        log_level="error",
     )
+
 
 if __name__ == "__main__":
     main()

@@ -6,11 +6,7 @@ Imagine a medical researcher running an experiment in which each patient is
 randomly assigned to receive either a placebo or an experimental medication.
 
 The patients, for whatever reason, don't trust the researcher to assign the
-groups fairly. Without `safe-bit`, they have two options:
-
-- trust the researcher not to cheat, or
-- rely on a third party to verify the assignment, which only moves the problem:
-  that third party could collude with the researcher.
+groups fairly.
 
 ## How `safe-bit` helps
 

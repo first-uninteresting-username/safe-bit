@@ -12,7 +12,7 @@ class Key:
         if len(material) != 32:
             raise ValueError("Key material must be 32 bytes long")
         if not 0 <= generation < 2**32:
-                raise ValueError("Generation must fit an unsigned 32-bit integer")
+            raise ValueError("Generation must fit an unsigned 32-bit integer")
         if not 0 <= valid_from < valid_until:
             raise ValueError("Validity must satisfy 0 <= valid_from < valid_until")
         if valid_from > valid_until:
@@ -22,7 +22,6 @@ class Key:
         self.generation: int = generation
         self.valid_from: int = valid_from
         self.valid_until: int = valid_until
-
 
     def encrypt_minute(self, minute: int) -> bytes:
         cipher: ChaCha20Poly1305 = ChaCha20Poly1305(self.material)

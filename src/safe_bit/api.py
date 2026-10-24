@@ -60,17 +60,24 @@ def _validate_secret(secret: str) -> None:
         raise HTTPException(400, "Secret must be valid Base64.") from exc
 
 
+def _require_past_minute(timestamp: int) -> None:
+    if timestamp >= get_current_time():
+        raise HTTPException(400, "Timestamp must be in the past.")
+
+
 def _iso_for_timestamp(timestamp: int) -> str:
     try:
         return get_date_from_time(timestamp).isoformat()
     except OverflowError as exc:
         raise HTTPException(400, "Timestamp is outside the datetime range.") from exc
 
+
 app.mount(
     "/static",
     StaticFiles(directory=Path(__file__).resolve().parent / "web/static"),
     name="static",
 )
+
 
 @app.get("/health", summary="Check service health")
 def health() -> dict[str, str]:
@@ -107,7 +114,8 @@ def new_bit(req: NewBitRequest) -> dict[str, str | int]:
 
 @app.post("/release", summary="Release an encrypted minute")
 def release(req: TimestampRequest) -> JSONResponse:
-    """Return the Base64 encrypted minute using its archived key immediately."""
+    """Return the Base64 encrypted minute once that minute has passed."""
+    _require_past_minute(req.timestamp)
     key = _get_key(req.timestamp)
     return JSONResponse(
         content={
@@ -129,8 +137,11 @@ def verify(req: VerifyRequest) -> dict[str, bool | dict[str, bool]]:
     Returns the individual checks and whether all checks passed.
     """
     _validate_secret(req.secret_b64)
+    _require_past_minute(req.timestamp)
     key = _get_key(req.timestamp)
-    checks = verify_bit_checks(req.commitment, req.bit, req.timestamp, req.secret_b64, key)
+    checks = verify_bit_checks(
+        req.commitment, req.bit, req.timestamp, req.secret_b64, key
+    )
     if req.sha512_secret_b64 is not None:
         checks["sha512_secret_b64_matches"] = compare_digest(
             sha512(req.secret_b64.encode("ascii")).hexdigest(),
@@ -168,6 +179,7 @@ async def iso_for_time(req: TimestampRequest) -> dict[str, str]:
     """
     return {"iso": _iso_for_timestamp(req.timestamp)}
 
+
 @app.get("/info", summary="Return server information")
 async def info() -> JSONResponse:
     """Return the server's reference date and key validity period."""
@@ -177,6 +189,7 @@ async def info() -> JSONResponse:
             "key-validity": KEY_VALIDITY,
         }
     )
+
 
 @app.get("/secret", summary="Create a secret")
 def secret() -> JSONResponse:

@@ -21,6 +21,7 @@
 
   git-hooks.hooks = {
     ruff.enable = true;
+    ruff-format.enable = true;
     pyright.enable = true;
     prettier.enable = true;
   };

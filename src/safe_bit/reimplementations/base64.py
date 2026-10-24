@@ -2,13 +2,13 @@ from .base64_alphabet import ALPHABET
 
 
 def _split_6bits(b: bytes) -> list[int]:
-    value = int.from_bytes(b, byteorder='big')
+    value = int.from_bytes(b, byteorder="big")
 
     sections = [
         (value >> 18) & 0x3F,
         (value >> 12) & 0x3F,
-        (value >> 6)  & 0x3F,
-        value         & 0x3F,
+        (value >> 6) & 0x3F,
+        value & 0x3F,
     ]
 
     return sections
@@ -19,20 +19,20 @@ def encode(b: bytes) -> str:
     position = 0
 
     while position < len(b):
-        byte1 = b[position:position + 1]
+        byte1 = b[position : position + 1]
 
         if position + 1 < len(b):
-            byte2 = b[position + 1:position + 2]
+            byte2 = b[position + 1 : position + 2]
             have_b2 = True
         else:
-            byte2 = b'\x00'
+            byte2 = b"\x00"
             have_b2 = False
 
         if position + 2 < len(b):
-            byte3 = b[position + 2:position + 3]
+            byte3 = b[position + 2 : position + 3]
             have_b3 = True
         else:
-            byte3 = b'\x00'
+            byte3 = b"\x00"
             have_b3 = False
 
         full_bytes = byte1 + byte2 + byte3
@@ -48,11 +48,12 @@ def encode(b: bytes) -> str:
         position = position + 3
     return result
 
+
 def decode(s: str) -> bytes:
     result = b""
 
     for position in range(0, len(s), 4):
-        group = s[position:position + 4]
+        group = s[position : position + 4]
 
         padding = group.count("=")
         value = 0
@@ -64,6 +65,6 @@ def decode(s: str) -> bytes:
                 value |= ALPHABET.index(char)
 
         decoded = value.to_bytes(3, "big")
-        result += decoded[:3 - padding]
+        result += decoded[: 3 - padding]
 
     return result

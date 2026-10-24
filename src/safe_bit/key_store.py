@@ -12,8 +12,10 @@ from .variables import KEY_VALIDITY
 class NoKeyForMinuteError(ValueError):
     pass
 
+
 class OverlappingKeyRangesError(ValueError):
     pass
+
 
 class KeyStore:
     def __init__(self, db_path: Path):
@@ -105,7 +107,7 @@ class KeyStore:
 
     def generate_key_and_insert(self, time: int | None = None) -> Key:
         if time is None:
-                time = get_current_time()
+            time = get_current_time()
         row = cast(
             tuple[int],
             self._conn.execute("""
@@ -123,9 +125,11 @@ class KeyStore:
         self.insert(key)
         return key
 
-    def ensure_current_key(self, time: int | None = None, allow_creation: bool = True) -> Key:
+    def ensure_current_key(
+        self, time: int | None = None, allow_creation: bool = True
+    ) -> Key:
         if time is None:
-                time = get_current_time()
+            time = get_current_time()
         _ = self._conn.execute("BEGIN IMMEDIATE")
         try:
             minute = time

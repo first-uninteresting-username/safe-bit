@@ -138,8 +138,12 @@ async function validateBit() {
       body: JSON.stringify(request),
     });
     if (!response.ok) {
+      // Show the server's reason when it gives one (e.g. the minute hasn't passed yet).
+      const data = await response.json().catch(() => ({}));
       output.textContent =
-        "Bit validation failed. This most likely means the request is malformed.";
+        typeof data.detail === "string"
+          ? `Bit validation failed: ${data.detail}`
+          : "Bit validation failed. This most likely means the request is malformed.";
       return;
     }
 

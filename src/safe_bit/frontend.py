@@ -14,9 +14,8 @@ from .variables import (
 )
 
 router = APIRouter()
-templates = Jinja2Templates(
-    directory=Path(__file__).resolve().parent / "web"
-)
+templates = Jinja2Templates(directory=Path(__file__).resolve().parent / "web")
+
 
 @router.get("/", response_class=HTMLResponse)
 def home(request: Request):
@@ -29,6 +28,7 @@ def home(request: Request):
             "source_code_link": SOURCE_CODE_LINK,
         },
     )
+
 
 @router.get("/privacy", response_class=HTMLResponse)
 def privacy(request: Request):

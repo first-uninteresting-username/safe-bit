@@ -2,16 +2,16 @@
 
 ## Creating PRs
 
-It's recommended to ask if some feature would be desired before making a PR.
+It's recommended to ask whether a feature would be welcome before opening a PR.
 If I don't respond to your PR within a week, feel free to message me.
 
-If you are not using devenv, make sure there're no ruff and pyright errors.
+If you are not using devenv, make sure there are no ruff or pyright errors.
 
 ## Dev setup
 
-[Devenv](https://devenv.sh) provides developer envinroment for the project.
+[Devenv](https://devenv.sh) provides the development environment for the project.
 
-To enter the shell run:
+To enter the shell, run:
 
 ```bash
 devenv shell
