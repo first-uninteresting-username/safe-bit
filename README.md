@@ -36,3 +36,7 @@ Native installations are not supported.
 - Letting the server clock skew (breaks the system, running NTP/chrony is highly recommended)
 - Exposing endpoints without your own rate limiting (endpoints aren't rate limited)
 - Leaving `OPERATOR_NAME`, `CONTACT_EMAIL` and (when applies) `HOSTING_LOG_NOTE` unchanged (those values land in legally binding privacy policy)
+
+## How to use
+
+The whole procedure is explained in [a dedicated doc](/docs/usage.md).

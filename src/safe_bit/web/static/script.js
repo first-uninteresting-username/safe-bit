@@ -130,7 +130,7 @@ async function validateBit() {
   }
 
   try {
-    const response = await fetch("/new-bit", {
+    const response = await fetch("/verify", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
