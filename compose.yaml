@@ -1,0 +1,26 @@
+services:
+  safe-bit:
+    image: ghcr.io/first-uninteresting-username/safe-bit:latest
+    ports:
+      - "8000:8000" # Adjust the port if needed
+    volumes:
+      - safe-bit-data:/var/lib/safe-bit
+    restart: unless-stopped
+    read_only: true # the app only writes to the data volume
+    tmpfs:
+      - /tmp # scratch space for SQLite temp files, since the root fs is read-only
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      SECRET_LENGTH: "32" # How long (bytes) should the default secret length be
+      T0: "2026-09-14T00:00:00+00:00" # ISO 8601 date marking minute 0. DO NOT CHANGE AFTER INITIALIZATION
+      KEY_VALIDITY: "10080" # How long should keys be valid for in minutes
+      ALLOWED_DRIFT: "5" # How much drift between server time and time declared by user is allowed in minutes
+      OPERATOR_NAME: "John Doe" # Operator name (for privacy policy)
+      CONTACT_EMAIL: "john.doe@example.com" # Operator email (for privacy policy)
+      HOSTING_LOG_NOTE: "" # Describe logs kept outside the app (for privacy policy)
+
+volumes:
+  safe-bit-data:
