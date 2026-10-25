@@ -1,6 +1,6 @@
 services:
   safe-bit:
-    image: ghcr.io/first-uninteresting-username/safe-bit:latest@sha256:3d59cf9753bc8b42dab253069d741a5ad8b661c118eeb9ed5bb9ae1b1de4b84b
+    image: ghcr.io/first-uninteresting-username/safe-bit:latest@sha256:7819db318b4f27aca4bbfcc1be4f9d27671d56b7e2c7f6080fce453790cebc63
     ports:
       - "127.0.0.1:8000:8000" # Adjust the port if needed
     volumes:
