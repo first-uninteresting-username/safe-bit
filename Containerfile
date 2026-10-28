@@ -1,11 +1,11 @@
-FROM docker.io/library/python:3.15-slim@sha256:533b0b2f9b5d46fd097091cf826f27902f1d6c3bca714b6dc74551356aa97a51 AS builder
+FROM docker.io/library/python:3.15-slim@sha256:94d3426f1def7db4a106a232ac121bfd975393e5dfd40a619b955fae45fe7913 AS builder
 
 WORKDIR /build
 COPY pyproject.toml README.md LICENSE ./
 COPY src/ src/
 RUN pip install --prefix=/install .
 
-FROM docker.io/library/python:3.15-slim@sha256:533b0b2f9b5d46fd097091cf826f27902f1d6c3bca714b6dc74551356aa97a51
+FROM docker.io/library/python:3.15-slim@sha256:94d3426f1def7db4a106a232ac121bfd975393e5dfd40a619b955fae45fe7913
 
 COPY --from=builder /install /usr/local
 RUN useradd --system --uid 10001 --no-create-home --shell /usr/sbin/nologin safe-bit \
